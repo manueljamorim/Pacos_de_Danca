@@ -3,6 +3,14 @@ import json
 import random
 #import names #tem de se instalar cmd -> sudo pip install names 
 
+#Utilizacao do DEEZER API para importar dados
+
+#TO DO LIST
+#Utilizador, playlist, banda, artista, concerto, videoclip, ator, produtor,
+#VideoclipAtor, VideoclipProdutor, ConcertoAutor, ConcertoMusica,
+#GenerosFavoritos, BandaArtista, AutorBandaArtista
+
+
 #Table: Album
 albums_list = []
 #(id nome  dataLancamento idEditora)
@@ -95,9 +103,6 @@ def playlist_creator():
 
 
 
-
-
-    
 #Daft Punk    
 album_load(302127)
 album_load(6575789)
@@ -109,12 +114,43 @@ album_load(6899610)
 album_load(401346)
 album_load(401340)
 album_load(401361)
-album_load(1166556)
-album_load(63203772)
-album_load(426670)
+#album_load(1166556)
+#album_load(63203772)
+#album_load(426670)
 
 #AlexTurner(membro Arctic Monkeys)
 album_load(921000)
+
+#Tamino
+album_load(75624372)
+
+#X-tense
+album_load(106585062)
+
+#Djavan
+album_load(7371939)
+
+#Joao Gilberto
+album_load(228644)
+
+#Beatles
+album_load(12047958)
+album_load(12047952)
+album_load(12047956)
+
+#Kanye West
+album_load(13357219)
+album_load(116355212)
+
+#Chico da Tina
+album_load(265953002)
+album_load(214037042) #(feat. eddy0)
+
+#TylerTheCreator
+album_load(44730061)
+album_load(97140952)
+
+
 
 playlist_creator()
 
