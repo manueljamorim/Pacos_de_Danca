@@ -1,6 +1,7 @@
 from urllib.request import urlopen
 import json
 import random
+import YoutubeAPI
 #import names #tem de se instalar cmd -> sudo pip install names 
 
 #Utilizacao do DEEZER API para importar dados
@@ -100,6 +101,23 @@ def playlist_creator():
         for musica in lista:
             playlistMusica.append((id_playlist,musica[0]))
 
+def loadVideoclips():
+    f = open("albums_list.txt", "r")
+    j = open("music_list.txt", "a")
+    lines = f.readlines();
+    for x in albums_list:
+        found = False
+        for line in lines:
+            if x in line:
+                found = True
+        if found == False:
+            try:
+                title_and_id = YoutubeAPI.youtube_search(x)
+                j.write(title_and_id[0] + " " + "(" + title_and_id[1] + ")")
+                print("added " + title_and_id[0])
+            except:
+                print("An HTTP error occured")
+
 
 
 
@@ -150,7 +168,7 @@ album_load(214037042) #(feat. eddy0)
 album_load(44730061)
 album_load(97140952)
 
-
+loadVideoclips()
 
 playlist_creator()
 

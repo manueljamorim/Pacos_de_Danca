@@ -17,22 +17,17 @@ def youtube_search(titulo):
     maxResults=1
   ).execute()
 
-  videos = []
-
   # Add each result to the appropriate list, and then display the lists of
   # matching videos, channels, and playlists.
   for search_result in search_response.get("items", []):
     if search_result["id"]["kind"] == "youtube#video":
-      videos.append("%s (%s)" % (search_result["snippet"]["title"],
-                                 search_result["id"]["videoId"]))
+      return (search_result["snippet"]["title"], search_result["id"]["videoId"])
 
+def Test():
+  lista_musicas = ["fuck forex"]
 
-  print("Videos:\n", "\n".join(videos), "\n")
-
-lista_musicas = ["fuck forex"]
-
-for i in lista_musicas:
-  try:
-    youtube_search(i)
-  except HttpError as e:
-    print("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
+  for i in lista_musicas:
+    try:
+      print(youtube_search(i))
+    except:
+      print("An HTTP error occurred")
