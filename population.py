@@ -13,9 +13,14 @@ if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unveri
 # Utilizacao do DEEZER API para importar dados
 
 # TO DO LIST
-# playlist, banda, artista, videoclip,
-# VideoclipAtor, VideoclipProdutor, ConcertoMusica,
-# BandaArtista, AutorBandaArtista
+# banda, artista, videoclip,
+# AutorBandaArtista,BandaArtista
+
+
+#Adicionar à mão:
+# AutorAlbum --> varios autores
+
+
 
 # Table: Utilizador
 utilizador_list = []
@@ -82,6 +87,28 @@ videoclip_ator = []
 videoclip_produtor = []
 #idvideoclip idprodutor
 
+#Table: Playlist
+playlist_table = []
+#id nome idUtilizador
+
+
+#Table: Videoclip
+#por implementar!
+videoclip_table = [(1,"","Portugal", 360), (2,"","France", 30)]
+#id url localFilmagem duracao
+
+#Table: VideoclipAtor
+videoclip_ator = []
+#idVideoclip idAtor
+
+#Table: VideoclipProdutor
+videoclip_produtor = []
+#idVideoclip idProdutor
+
+#Table: ConcertoMusica
+concerto_musica = []
+#idconcerto idmusica
+
 countries = ["Albania", "Latvia",
                  "Andorra", "Liechtenstein",
                  "Armenia", "Lithuania",
@@ -109,7 +136,37 @@ countries = ["Albania", "Latvia",
                  "Italy", "Ukraine",
                  "Kosovo", "United Kingdom"]
 month_days = {1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
-
+playlist_names = [
+    "Songs that make me Clown",
+    "Rhythmic Existentialism",
+    "Beat Drop at 1,2,3",
+    "Serial Killer Favourites",
+    "Artist's that murmur their lyrics",
+    "Songs that make me go Swoosh",
+    "Pit of Darkness",
+    "Alarm Tones disguised as Songs",
+    "Songs that make no sense",
+    "Personal Notes in form of songs",
+    "Songs with nothing but beat drops",
+    "What is even Techno",
+    "Songs about food",
+    "Listen don't Read",
+    "Songs to play at Funeral",
+    "Songs to play at my Wedding",
+    "Discooooo Baby",
+    "Singles feeling Heartbreak",
+    "Listen With Caution",
+    "This flippity dippity-hippity hip-hop",
+    "I Want to Fly Away",
+    "Not Your Valentine",
+    "Say Hello, Spaceman",
+    "Dance to the Beat",
+    "Uprise  Groovy Like a Drive in Movie",
+    "Faded Under Gold Skies",
+    "Rockabilly Dazzlers",
+    "Today's Deep House",
+    "Jungle Music"
+]
 
 def album_load(id):
     url = "https://api.deezer.com/album/" + str(id)
@@ -161,6 +218,8 @@ def playlist_creator():
         for musica in lista:
             playlistMusica.append((id_playlist, musica[0]))
 
+        playlist_table.append((id_playlist,random.sample(playlist_names,1)[0],random.sample(utilizador_list,1)[0][0]))
+
 
 def utilizador_creator():
     # id nome  username dataNascimento,nacionalidade ,idUltimaOuvida
@@ -197,11 +256,21 @@ def concerto_creator():
         concerto_list.append((id,year+"-"+month+"-"+day, random.sample(countries,1)[0]))
 
         n_autores = random.randint(1,3)
-        autores = random.sample(list(key_autor),n_autores) #(id, nome)
+        autores = random.sample(list(key_autor),n_autores)
+
+
+        musicas_possiveis = []
 
         for autor in autores:
             concerto_autor.append((id,autor))
+            albuns_possiveis = list(filter(lambda x: x[0]==autor,autorAlbum))
+            albuns_possiveis = list(map(lambda x: x[1],albuns_possiveis))
+            musicas_possiveis += list(filter(lambda x: x[1] in albuns_possiveis, musicaAlbum.items()))
 
+        n_musicas = random.randint(1, len(musicas_possiveis))
+        setlist = random.sample(musicas_possiveis, n_musicas)
+        for musica_album in setlist:
+            concerto_musica.append((id, musica_album[0]))
 
 def names_creator(lista):
     for id in range(30):
@@ -218,6 +287,13 @@ def generos_favoritos_creator():
         generos_favoritos.append((idutilizador,3, generos[2]))
 
 
+def videoclip_crew_creator(lista_crew, listavideoclip_crew):
+    for videoclip in videoclip_table:
+        id = videoclip[0]
+        n_crew = random.randint(1,3)
+        lista_intervenientes = random.sample(lista_crew, n_crew)
+        for interveniente in lista_intervenientes:
+            listavideoclip_crew.append((id,interveniente[0]))
 
 
 
@@ -226,16 +302,12 @@ if __name__ == '__main__':
     album_load(302127)
     album_load(6575789)
     album_load(6703346)  # (feat. Pharrell Williams & Nile Rodgers)
-    album_load(301775)
+
 
     # Arctic Monkeys
     album_load(6899610)
     album_load(401346)
     album_load(401340)
-    album_load(401361)
-    # album_load(1166556)
-    # album_load(63203772)
-    # album_load(426670)
 
     # AlexTurner(membro Arctic Monkeys)
     album_load(921000)
@@ -275,11 +347,20 @@ if __name__ == '__main__':
     names_creator(ator_table)
     names_creator(produtor_table)
     generos_favoritos_creator()
+    videoclip_crew_creator(ator_table, videoclip_ator)
+    videoclip_crew_creator(produtor_table, videoclip_produtor)
 
-    print(concerto_list)
-    print(concerto_autor)
-    print(key_autor)
-    print(ator_table)
-    print(produtor_table)
-    print(generos_favoritos)
+    print(music_list)
+    # print(concerto_list)
+    # print(concerto_autor)
+    # print(key_autor)
+    # print(ator_table)
+    # print(produtor_table)
+    # print(generos_favoritos)
+    # print(playlist_table)
+    # print(videoclip_ator)
+    # print(videoclip_produtor)
+    print(concerto_musica)
+
+
 
