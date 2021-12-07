@@ -13,9 +13,9 @@ if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unveri
 # Utilizacao do DEEZER API para importar dados
 
 # TO DO LIST
-# playlist, banda, artista, videoclip, ator, produtor,
+# playlist, banda, artista, videoclip,
 # VideoclipAtor, VideoclipProdutor, ConcertoMusica,
-# GenerosFavoritos, BandaArtista, AutorBandaArtista
+# BandaArtista, AutorBandaArtista
 
 # Table: Utilizador
 utilizador_list = []
@@ -70,6 +70,18 @@ ator_table= []
 produtor_table= []
 #id nome
 
+#Table: GenerosFavoritos
+generos_favoritos = []
+#idutilizador idgenero numeroOrdem
+
+#Table: VideoclipAtor
+videoclip_ator = []
+#idvideoclip idator
+
+#Table: VideoclipProdutor
+videoclip_produtor = []
+#idvideoclip idprodutor
+
 countries = ["Albania", "Latvia",
                  "Andorra", "Liechtenstein",
                  "Armenia", "Lithuania",
@@ -97,6 +109,7 @@ countries = ["Albania", "Latvia",
                  "Italy", "Ukraine",
                  "Kosovo", "United Kingdom"]
 month_days = {1: 31, 2: 28, 3: 31, 4: 30, 5: 31, 6: 30, 7: 31, 8: 31, 9: 30, 10: 31, 11: 30, 12: 31}
+
 
 def album_load(id):
     url = "https://api.deezer.com/album/" + str(id)
@@ -168,6 +181,7 @@ def utilizador_creator():
                                 "@" + firstname + "_" + lastname,
                                 year + "-" + month + "-" + day,random.sample(music_list, 1)[0][0]))
 
+
 def concerto_creator():
     # (id,data,local)
     for id in range(30):
@@ -188,9 +202,23 @@ def concerto_creator():
         for autor in autores:
             concerto_autor.append((id,autor))
 
+
 def names_creator(lista):
     for id in range(30):
         lista.append((id,names.get_first_name()+" "+names.get_last_name()))
+
+
+def generos_favoritos_creator():
+    #idutilizador idgenero numeroOrdem
+    for utilizador in utilizador_list:
+        idutilizador = utilizador[0]
+        generos = random.sample(list(key_genero),3)
+        generos_favoritos.append((idutilizador,1,generos[0]))
+        generos_favoritos.append((idutilizador,2, generos[1]))
+        generos_favoritos.append((idutilizador,3, generos[2]))
+
+
+
 
 
 if __name__ == '__main__':
@@ -246,10 +274,12 @@ if __name__ == '__main__':
     concerto_creator()
     names_creator(ator_table)
     names_creator(produtor_table)
+    generos_favoritos_creator()
 
     print(concerto_list)
     print(concerto_autor)
     print(key_autor)
     print(ator_table)
     print(produtor_table)
+    print(generos_favoritos)
 
