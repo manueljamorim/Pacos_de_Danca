@@ -17,7 +17,7 @@ def isFoundInFile(internal_id_search):
             return True
     return False
 
-def youtube_search(titulo, id_interno_musica = -1):
+def youtube_search(titulo, id_interno_musica):
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     developerKey=DEVELOPER_KEY)
 
