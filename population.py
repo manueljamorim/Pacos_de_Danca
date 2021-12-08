@@ -8,18 +8,18 @@ import os, ssl
 if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unverified_context', None)):
     ssl._create_default_https_context = ssl._create_unverified_context
 # import names #tem de se instalar cmd -> sudo pip install names
-
-
 # Utilizacao do DEEZER API para importar dados
 
 # TO DO LIST
-# banda, artista, videoclip,
-# AutorBandaArtista,BandaArtista
+# banda, (id data_formacao)
+# artista, (id data_nascimento)
+# videoclip, (id url localFilmagem duracao)
+# AutorBandaArtista, (id autor, id banda, id artista)
+# BandaArtista, (idbanda, idartista)
 
 
 #Adicionar à mão:
 # AutorAlbum --> varios autores
-
 
 
 # Table: Utilizador
@@ -91,7 +91,6 @@ videoclip_produtor = []
 playlist_table = []
 #id nome idUtilizador
 
-
 #Table: Videoclip
 #por implementar!
 videoclip_table = [(1,"","Portugal", 360), (2,"","France", 30)]
@@ -108,6 +107,23 @@ videoclip_produtor = []
 #Table: ConcertoMusica
 concerto_musica = []
 #idconcerto idmusica
+
+#Table: Banda
+banda_list = {};
+#(id dataFormacao)
+
+#Table: Artista
+artista_list = {};
+#(id dataNascimento)
+
+#Table: AutorBandaArtista
+AutorBandaArtista = [];
+#(idAutor idBanda idArtista)
+
+#Table: BandaArtista
+banda_artista = [];
+#(idbanda, idartista)
+
 
 countries = ["Albania", "Latvia",
                  "Andorra", "Liechtenstein",
@@ -167,8 +183,9 @@ playlist_names = [
     "Today's Deep House",
     "Jungle Music"
 ]
+id_artist_counter = 100000000;
 
-def album_load(id):
+def album_load(id, isBanda=0, lista_membros=[]):
     url = "https://api.deezer.com/album/" + str(id)
     response = urlopen(url)
     dj = json.loads(response.read())
@@ -203,6 +220,24 @@ def album_load(id):
 
     autorAlbum.append((artist_id, id))
 
+
+    # data = random.randint(1950, 2000)
+    #
+    # #Banda creator
+    # if isBanda and artist_id not in banda_list:
+    #     banda_list[artist_id] = data
+    #     AutorBandaArtista.append((artist_id,artist_id,"NULL"))
+    #     for membro in lista_membros:
+    #         if(type(membro)==tuple):
+    #             if membro[1] not in key_autor:
+    #                 key_autor[membro[1]]=membro[0]
+    #
+    #         else:
+    #             global id_artist_counter
+    #             key_autor[id_artist_counter] = membro;
+    #             id_artist_counter+=1
+
+
     tracks = dj["tracks"]["data"]
     tracks = list(map(lambda x: (x["id"], x["title_short"]), tracks))
 
@@ -212,7 +247,7 @@ def album_load(id):
 
 
 def playlist_creator():
-    for id_playlist in range(30):  # creates 30 playlists
+    for id_playlist in range(20):  # creates 20 playlists
         x = random.randint(5, 15)  # playlist com 5 a 15 musicas
         lista = random.sample(music_list, x)
         for musica in lista:
@@ -272,6 +307,7 @@ def concerto_creator():
         for musica_album in setlist:
             concerto_musica.append((id, musica_album[0]))
 
+
 def names_creator(lista):
     for id in range(30):
         lista.append((id,names.get_first_name()+" "+names.get_last_name()))
@@ -299,17 +335,17 @@ def videoclip_crew_creator(lista_crew, listavideoclip_crew):
 
 if __name__ == '__main__':
     # Daft Punk
-    album_load(302127)
-    album_load(6575789)
-    album_load(6703346)  # (feat. Pharrell Williams & Nile Rodgers)
+    album_load(302127,1, ["Guy-Manuel de Homem-Christo","Thomas Bangalter"])
+    album_load(6575789,1)
+    album_load(6703346,1)  # (feat. Pharrell Williams & Nile Rodgers)
 
 
     # Arctic Monkeys
-    album_load(6899610)
-    album_load(401346)
-    album_load(401340)
+    album_load(6899610,1, [("Alex Turner",1195633),"Jamie Cook", "Nick O'Malley", "Matt Helders"])
+    album_load(401346,1)
+    album_load(401340,1)
 
-    # AlexTurner(membro Arctic Monkeys)
+    # Alex Turner(membro Arctic Monkeys)
     album_load(921000)
 
     # Tamino
@@ -325,9 +361,9 @@ if __name__ == '__main__':
     album_load(228644)
 
     # Beatles
-    album_load(12047958)
-    album_load(12047952)
-    album_load(12047956)
+    album_load(12047958,1, [("John Lennon",226),("Paul McCartney",1446),"George Harrison","Ringo Starr"])
+    album_load(12047952,1)
+    album_load(12047956,1)
 
     # Kanye West
     album_load(13357219)
@@ -340,6 +376,28 @@ if __name__ == '__main__':
     # TylerTheCreator
     album_load(44730061)
     album_load(97140952)
+
+    # DavidBowie
+    album_load(11205422)
+
+    #Salvador Sobral
+    album_load(15586282)
+
+    #Sufjan Stevens
+    album_load(50846532)
+    album_load(96861532)
+
+    #Bruno Mars
+    album_load(6157080)
+    album_load(211423112) #feat Anderson .Paak
+
+    #Anderson .Paak
+    album_load(78640552)
+
+    #Queen
+    album_load(915785)
+    album_load(1121401)
+    album_load(1232880)
 
     utilizador_creator()
     playlist_creator()
