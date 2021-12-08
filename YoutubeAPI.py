@@ -14,9 +14,9 @@ def isFoundInFile(internal_id_search):
     for line in lines:
         internal_id = int(line.split("///")[0])
         if internal_id == internal_id_search:
-            print("found in api")
-            return True
-    return False
+            print("found in file")
+            return [line]
+    return []
 
 def youtube_search(titulo, id_interno_musica):
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
@@ -24,6 +24,9 @@ def youtube_search(titulo, id_interno_musica):
 
     # Call the search.list meqthod to retrieve results matching the specified
     # query term.
+    video_info1 = isFoundInFile(id_interno_musica)
+    if video_info1 != []:
+        return video_info1[0]
     try:
         search_response = youtube.search().list(
             q=titulo,
@@ -37,38 +40,28 @@ def youtube_search(titulo, id_interno_musica):
         # matching videos, channels, and playlists.
         for search_result in search_response.get("items", []):
             if search_result["id"]["kind"] == "youtube#video":
-                video_title = search_result["snippet"]["title"]
-                if isFoundInFile(id_interno_musica):
-                    file1 = open('MusicVideosInfo.txt', 'r')
-                    lines = file1.readlines()
-                    for line in lines:
-                        internal_id = int(line.split("///")[0])
-                        if internal_id == id_interno_musica:
-                            print("returned from file")
-                            return line
-                else:
-                    video_id = search_result["id"]["videoId"]
-                    stats = youtube.videos().list(part='statistics', id=video_id).execute()
-                    stat2 = youtube.videos().list(part='contentDetails', id=video_id).execute()
-                    viewcount = stats["items"][0]["statistics"]["viewCount"]
-                    #get duration and parse
-                    duration_string = stat2["items"][0]["contentDetails"]["duration"]
-                    duration_string2 = duration_string.split("M")
-                    duration_min = duration_string2[0][2:]
-                    duration_sec_part = duration_string2[1][:-1]
-                    duration_total_sec = int(duration_min) * 60 + int(duration_sec_part)
-                    #append results
-                    file1 = open('MusicVideosInfo.txt', 'a')
-                    file1.write("%s///%s///%s///%s///%s\n" % (id_interno_musica ,video_title, video_id, duration_total_sec, viewcount))
-                    video_info.append("%s///%s///%s///%s///%s\n" % (id_interno_musica ,video_title, video_id, duration_total_sec, viewcount))
-                    print("returned from api")
-                    return video_info[0]
+                video_id = search_result["id"]["videoId"]
+                stats = youtube.videos().list(part='statistics', id=video_id).execute()
+                stat2 = youtube.videos().list(part='contentDetails', id=video_id).execute()
+                viewcount = stats["items"][0]["statistics"]["viewCount"]
+                #get duration and parse
+                duration_string = stat2["items"][0]["contentDetails"]["duration"]
+                duration_string2 = duration_string.split("M")
+                duration_min = duration_string2[0][2:]
+                duration_sec_part = duration_string2[1][:-1]
+                duration_total_sec = int(duration_min) * 60 + int(duration_sec_part)
+                #append results
+                file1 = open('MusicVideosInfo.txt', 'a')
+                file1.write("%s///%s///%s///%s///%s\n" % (id_interno_musica ,video_title, video_id, duration_total_sec, viewcount))
+                video_info.append("%s///%s///%s///%s///%s\n" % (id_interno_musica ,video_title, video_id, duration_total_sec, viewcount))
+                print("returned from api")
+                return video_info[0]
     except:
         return "-"
 
 #to test with an example
-print(youtube_search("chico da tina", 325626434755))
-print(youtube_search("Highway To Hell", 14))
+print(youtube_search("chico da tina", 5))
+print(youtube_search("Highway To Hell", 34))
 print(youtube_search("ACultura Ep #1 - Sam the Kid", 3223337))
     
     
