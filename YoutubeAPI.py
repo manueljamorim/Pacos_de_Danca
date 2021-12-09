@@ -19,17 +19,13 @@ def isFoundInFile(internal_id_search):
     return []
 
 def youtube_search(titulo, id_interno_musica):
-    return "-"
-
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     developerKey=DEVELOPER_KEY)
 
     # Call the search.list meqthod to retrieve results matching the specified
     # query term.
     video_info1 = isFoundInFile(id_interno_musica)
-    if video_info1 != []:
-        return video_info1[0]
-    try:
+    if video_info1 == []:
         search_response = youtube.search().list(
             q=titulo,
             part="id,snippet",
@@ -43,6 +39,7 @@ def youtube_search(titulo, id_interno_musica):
         for search_result in search_response.get("items", []):
             if search_result["id"]["kind"] == "youtube#video":
                 video_id = search_result["id"]["videoId"]
+                video_title = search_result["snippet"]["title"]
                 stats = youtube.videos().list(part='statistics', id=video_id).execute()
                 stat2 = youtube.videos().list(part='contentDetails', id=video_id).execute()
                 viewcount = stats["items"][0]["statistics"]["viewCount"]
@@ -58,13 +55,10 @@ def youtube_search(titulo, id_interno_musica):
                 video_info.append("%s///%s///%s///%s///%s\n" % (id_interno_musica ,video_title, video_id, duration_total_sec, viewcount))
                 #print("returned from api")
                 return video_info[0]
-    except:
-        return "-"
+    return "-"
 
 #to test with an example
-#print(youtube_search("chico da tina", 3))
 #print(youtube_search("Highway To Hell", 34))
-#print(youtube_search("ACultura Ep #1 - Sam the Kid", 3223337))
     
     
 
