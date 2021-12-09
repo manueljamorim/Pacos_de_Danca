@@ -15,6 +15,7 @@ if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unveri
 
 #Adicionar à mão:
 # AutorAlbum --> varios autores (idAutor, idAlbum)
+# Alterar tabela albumMusica
 
 
 # Table: Utilizador
