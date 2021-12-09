@@ -20,9 +20,9 @@ DROP TABLE IF EXISTS Musica;
 CREATE TABLE Musica (
   id            INTEGER PRIMARY KEY,
   nome          STRING NOT NULL,
-  imagemCapa	BLOB,
-  reproducoes	NOT NULL CHECK(reproducoes>=0),
-  idVideoclip	INTEGER	REFERENCES Videoclip (id)
+  imagemCapa	  BLOB,
+  reproducoes	  INTEGER NOT NULL CHECK(reproducoes>=0),
+  idVideoclip	  INTEGER	REFERENCES Videoclip (id)
 );
 
 -- Table: Genero
@@ -37,7 +37,7 @@ DROP TABLE IF EXISTS Playlist;
 CREATE TABLE Playlist (
   id            INTEGER PRIMARY KEY,
   nome          STRING NOT NULL,
-  idUtilizador 	INTEGER NOT NUll REFERENCES Utilizador (id)
+  idUtilizador 	INTEGER  REFERENCES Utilizador (id)
 );
 
 -- Table: Album
@@ -46,7 +46,7 @@ CREATE TABLE Album (
   id            INTEGER PRIMARY KEY,
   nome          STRING NOT NULL,
   dataLancamento	DATE,
-  idEditora		INTEGER NOT NUll REFERENCES Editora (id)
+  idEditora		INTEGER  REFERENCES Editora (id)
 );
 
 -- Table: Editora
@@ -89,9 +89,9 @@ CREATE TABLE Concerto (
 DROP TABLE IF EXISTS Videoclip;
 CREATE TABLE Videoclip (
   id            INTEGER PRIMARY KEY,
-  url 			STRING NOT NULL CHECK(substr(url, 1, 11 )='youtube.com' OR substr(url, 1, 8 )='youtu.be'),
+  url 			STRING NOT NULL ,
   localFilmagem	STRING,
-  duracao		INTEGER CHECK(duracao>0)
+  duracao		INTEGER CHECK(duracao>=0)
 );
 
 -- Table: Ator

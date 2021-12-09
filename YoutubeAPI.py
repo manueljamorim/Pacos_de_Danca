@@ -14,11 +14,13 @@ def isFoundInFile(internal_id_search):
     for line in lines:
         internal_id = int(line.split("///")[0])
         if internal_id == internal_id_search:
-            print("found in file")
+            #print("found in file")
             return [line]
     return []
 
 def youtube_search(titulo, id_interno_musica):
+    return "-"
+
     youtube = build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION,
     developerKey=DEVELOPER_KEY)
 
@@ -54,15 +56,15 @@ def youtube_search(titulo, id_interno_musica):
                 file1 = open('MusicVideosInfo.txt', 'a')
                 file1.write("%s///%s///%s///%s///%s\n" % (id_interno_musica ,video_title, video_id, duration_total_sec, viewcount))
                 video_info.append("%s///%s///%s///%s///%s\n" % (id_interno_musica ,video_title, video_id, duration_total_sec, viewcount))
-                print("returned from api")
+                #print("returned from api")
                 return video_info[0]
     except:
         return "-"
 
 #to test with an example
-print(youtube_search("chico da tina", 5))
-print(youtube_search("Highway To Hell", 34))
-print(youtube_search("ACultura Ep #1 - Sam the Kid", 3223337))
+#print(youtube_search("chico da tina", 3))
+#print(youtube_search("Highway To Hell", 34))
+#print(youtube_search("ACultura Ep #1 - Sam the Kid", 3223337))
     
     
 

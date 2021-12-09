@@ -2,6 +2,7 @@ from urllib.request import urlopen
 import json
 import random
 import names
+import YoutubeAPI
 
 import os, ssl
 
@@ -11,15 +12,9 @@ if (not os.environ.get('PYTHONHTTPSVERIFY', '') and getattr(ssl, '_create_unveri
 # Utilizacao do DEEZER API para importar dados
 
 # TO DO LIST
-# banda, (id data_formacao)
-# artista, (id data_nascimento)
-# videoclip, (id url localFilmagem duracao)
-# AutorBandaArtista, (id autor, id banda, id artista)
-# BandaArtista, (idbanda, idartista)
-
 
 #Adicionar à mão:
-# AutorAlbum --> varios autores
+# AutorAlbum --> varios autores (idAutor, idAlbum)
 
 
 # Table: Utilizador
@@ -36,8 +31,7 @@ editora_key = {}
 # Table: Musica
 music_list = []
 # (id nome  imagemcapa reproducoes idvideoclip)
-# !! falta id vioclip
-# reproducoes ->random generator
+
 
 # Table: Autor
 key_autor = {}
@@ -93,7 +87,7 @@ playlist_table = []
 
 #Table: Videoclip
 #por implementar!
-videoclip_table = [(1,"","Portugal", 360), (2,"","France", 30)]
+videoclip_table = []
 #id url localFilmagem duracao
 
 #Table: VideoclipAtor
@@ -221,29 +215,50 @@ def album_load(id, isBanda=0, lista_membros=[]):
     autorAlbum.append((artist_id, id))
 
 
-    # data = random.randint(1950, 2000)
-    #
-    # #Banda creator
-    # if isBanda and artist_id not in banda_list:
-    #     banda_list[artist_id] = data
-    #     AutorBandaArtista.append((artist_id,artist_id,"NULL"))
-    #     for membro in lista_membros:
-    #         if(type(membro)==tuple):
-    #             if membro[1] not in key_autor:
-    #                 key_autor[membro[1]]=membro[0]
-    #
-    #         else:
-    #             global id_artist_counter
-    #             key_autor[id_artist_counter] = membro;
-    #             id_artist_counter+=1
+    data = random.randint(1950, 2000)
+    #Banda creator
+    if isBanda and artist_id not in banda_list:
+        banda_list[artist_id] = data
+        AutorBandaArtista.append((artist_id,artist_id,"NULL"))
+        for membro in lista_membros:
+            if(type(membro)==tuple):
+                if membro[1] not in key_autor:
+                    key_autor[membro[1]]=membro[0]
+                    AutorBandaArtista.append((membro[1], "NULL", membro[1]))
+                    artista_list[membro[1]] = random.randint(1950, 2000)
+                    banda_artista.append((artist_id,membro[1]))
+
+            else:
+                global id_artist_counter
+                key_autor[id_artist_counter] = membro
+                artista_list[id_artist_counter] = random.randint(1950, 2000)
+                AutorBandaArtista.append((id_artist_counter, "NULL", id_artist_counter))
+                banda_artista.append((artist_id, id_artist_counter))
+                id_artist_counter += 1
+    elif not isBanda and artist_id not in artista_list:
+        AutorBandaArtista.append((artist_id, "NULL", artist_id))
+        artista_list[artist_id] = data
 
 
     tracks = dj["tracks"]["data"]
     tracks = list(map(lambda x: (x["id"], x["title_short"]), tracks))
 
     for track in tracks:
-        music_list.append((track[0], track[1], cover, random.randint(0, 10000000), ""))
+        youtube_return = YoutubeAPI.youtube_search(track[1],track[0])
+        if(youtube_return != "-"):
+            youtube_return = youtube_return.split("///")
+            url = "https://www.youtube.com/" + youtube_return[2]
+            views = youtube_return[3]
+            duration = youtube_return[4]
+        else:
+            url = "NONE"
+            views = random.randint(0, 10000000)
+            duration = 0
+
+        id_videoclip = len(videoclip_table)
+        music_list.append((track[0], track[1], cover, views, id_videoclip))
         musicaAlbum[track[0]] = id
+        videoclip_table.append((id_videoclip,url,random.sample(countries,1)[0],duration))
 
 
 def playlist_creator():
@@ -273,12 +288,14 @@ def utilizador_creator():
 
         utilizador_list.append((id, firstname +" " + lastname,
                                 "@" + firstname + "_" + lastname,
-                                year + "-" + month + "-" + day,random.sample(music_list, 1)[0][0]))
+                                year + "-" + month + "-" + day,
+                                random.sample(countries,1)[0],
+                                random.sample(music_list, 1)[0][0]))
 
 
 def concerto_creator():
     # (id,data,local)
-    for id in range(30):
+    for id in range(35):
         year = str(random.randint(1950, 2015))
         month = random.randint(1, 12)
 
@@ -297,10 +314,15 @@ def concerto_creator():
         musicas_possiveis = []
 
         for autor in autores:
-            concerto_autor.append((id,autor))
             albuns_possiveis = list(filter(lambda x: x[0]==autor,autorAlbum))
             albuns_possiveis = list(map(lambda x: x[1],albuns_possiveis))
             musicas_possiveis += list(filter(lambda x: x[1] in albuns_possiveis, musicaAlbum.items()))
+
+        if(len(musicas_possiveis)<2):
+            continue
+
+        for autor in autores:
+            concerto_autor.append((id,autor))
 
         n_musicas = random.randint(1, len(musicas_possiveis))
         setlist = random.sample(musicas_possiveis, n_musicas)
@@ -318,9 +340,9 @@ def generos_favoritos_creator():
     for utilizador in utilizador_list:
         idutilizador = utilizador[0]
         generos = random.sample(list(key_genero),3)
-        generos_favoritos.append((idutilizador,1,generos[0]))
-        generos_favoritos.append((idutilizador,2, generos[1]))
-        generos_favoritos.append((idutilizador,3, generos[2]))
+        generos_favoritos.append((idutilizador,generos[0],1))
+        generos_favoritos.append((idutilizador, generos[1],2))
+        generos_favoritos.append((idutilizador, generos[2],3))
 
 
 def videoclip_crew_creator(lista_crew, listavideoclip_crew):
@@ -331,6 +353,133 @@ def videoclip_crew_creator(lista_crew, listavideoclip_crew):
         for interveniente in lista_intervenientes:
             listavideoclip_crew.append((id,interveniente[0]))
 
+def quote(string):
+    return string.replace("'", "''")
+
+def export_sql():
+    f = open("povoar.sql", "w")
+    f.write("PRAGMA foreign_keys = ON;\n")
+
+    f.write("-- Table: Videoclip\n")
+    for u in videoclip_table:
+        f.write("INSERT INTO Videoclip(id,url,localFilmagem,duracao) " +
+                "Values({0},'{1}','{2}',{3});\n".format(u[0], u[1], u[2], u[3]))
+
+    f.write("-- Table: Musica\n")
+    for u in music_list:
+        f.write("INSERT INTO Musica(id,nome,imagemCapa,reproducoes,idVideoclip) " +
+                "Values({0},'{1}','{2}',{3},{4});\n".format(u[0],quote(u[1]), u[2], u[3], u[4]))
+
+
+    f.write("-- Table: Utilizador\n")
+    for u in utilizador_list:
+        f.write("INSERT INTO Utilizador(id,nome,username,dataNascimento,nacionalidade,idUltimaOuvida) "+
+                "Values({0},'{1}','{2}','{3}','{4}',{5});\n".format(u[0],u[1],u[2],u[3],u[4],u[5]))
+
+
+    f.write("-- Table: Genero\n")
+    for u in key_genero.items():
+        f.write("INSERT INTO Genero(id,nome) " +
+                "Values({0},'{1}');\n".format(u[0], u[1]))
+
+
+    f.write("-- Table: Playlist\n")
+    for u in playlist_table:
+        f.write("INSERT INTO Playlist(id,nome,idUtilizador) " +
+                "Values({0},'{1}',{2});\n".format(u[0], quote(u[1]),u[2]))
+
+    f.write("-- Table: Editora\n")
+    for u in editora_key.items():
+        f.write("INSERT INTO Editora(id,nome) " +
+                "Values({0},'{1}');\n".format(u[1], quote(u[0])))
+
+    f.write("-- Table: Album\n")
+    for u in albums_list:
+        f.write("INSERT INTO Album(id,nome,dataLancamento,idEditora) " +
+                "Values({0},'{1}','{2}',{3});\n".format(u[0], quote(u[1]), u[2], u[3]))
+
+
+    f.write("-- Table: Autor\n")
+    for u in key_autor.items():
+        f.write("INSERT INTO Autor(id,nome) " +
+                "Values({0},'{1}');\n".format(u[0], quote(u[1])))
+
+    f.write("-- Table: Banda\n")
+    for u in banda_list.items():
+        f.write("INSERT INTO Banda(id,dataFormacao) " +
+                "Values({0},'{1}');\n".format(u[0], u[1]))
+
+    f.write("-- Table: Artista\n")
+    for u in artista_list.items():
+        f.write("INSERT INTO Artista(id,dataNascimento) " +
+                "Values({0},'{1}');\n".format(u[0], u[1]))
+
+    f.write("-- Table: Concerto\n")
+    for u in concerto_list:
+        f.write("INSERT INTO Concerto(id,data,local) " +
+                "Values({0},'{1}','{2}');\n".format(u[0], u[1],u[2]))
+
+
+
+    f.write("-- Table: Ator\n")
+    for u in ator_table:
+        f.write("INSERT INTO Ator(id,nome) " +
+                "Values({0},'{1}');\n".format(u[0], u[1]))
+
+    f.write("-- Table: Produtor\n")
+    for u in produtor_table:
+        f.write("INSERT INTO Produtor(id,nome) " +
+                "Values({0},'{1}');\n".format(u[0], u[1]))
+
+    f.write("-- Table: MusicaAlbum\n")
+    for u in musicaAlbum.items():
+        f.write("INSERT INTO MusicaAlbum(idMusica,idAlbum) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: VideoclipAtor\n")
+    for u in videoclip_ator:
+        f.write("INSERT INTO VideoclipAtor(idVideoclip,idAtor) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: VideoclipProdutor\n")
+    for u in videoclip_produtor:
+        f.write("INSERT INTO VideoclipProdutor(idVideoclip,idProdutor) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: PlaylistMusica\n")
+    for u in playlistMusica:
+        f.write("INSERT INTO PlaylistMusica(idPlaylist,idMusica) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: AutorAlbum\n")
+    for u in autorAlbum:
+        f.write("INSERT INTO AutorAlbum(idAutor,idAlbum) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: ConcertoAutor\n")
+    for u in concerto_autor:
+        f.write("INSERT INTO ConcertoAutor(idConcerto,idAutor) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: ConcertoMusica\n")
+    for u in concerto_musica:
+        f.write("INSERT INTO ConcertoMusica(idConcerto,idMusica) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: GenerosFavoritos\n")
+    for u in generos_favoritos:
+        f.write("INSERT INTO GenerosFavoritos(idUtilizador,idGenero,numeroOrdem) " +
+                "Values({0},{1},{2});\n".format(u[0], u[1], u[2]))
+
+    f.write("-- Table: BandaArtista\n")
+    for u in banda_artista:
+        f.write("INSERT INTO BandaArtista(idBanda,idArtista) " +
+                "Values({0},{1});\n".format(u[0], u[1]))
+
+    f.write("-- Table: AutorBandaArtista\n")
+    for u in AutorBandaArtista:
+        f.write("INSERT INTO AutorBandaArtista(idAutor,idBanda,idArtista) " +
+                "Values({0},{1},{2});\n".format(u[0], u[1], u[2]))
 
 
 if __name__ == '__main__':
@@ -383,10 +532,6 @@ if __name__ == '__main__':
     #Salvador Sobral
     album_load(15586282)
 
-    #Sufjan Stevens
-    album_load(50846532)
-    album_load(96861532)
-
     #Bruno Mars
     album_load(6157080)
     album_load(211423112) #feat Anderson .Paak
@@ -408,7 +553,9 @@ if __name__ == '__main__':
     videoclip_crew_creator(ator_table, videoclip_ator)
     videoclip_crew_creator(produtor_table, videoclip_produtor)
 
-    print(music_list)
+    export_sql()
+
+    #print(music_list)
     # print(concerto_list)
     # print(concerto_autor)
     # print(key_autor)
@@ -418,7 +565,10 @@ if __name__ == '__main__':
     # print(playlist_table)
     # print(videoclip_ator)
     # print(videoclip_produtor)
-    print(concerto_musica)
+    #print(videoclip_table)
+    #print(videoclip_table)
+
+
 
 
 
