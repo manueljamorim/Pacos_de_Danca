@@ -31,7 +31,7 @@ editora_key = {}
 
 # Table: Musica
 music_list = []
-# (id nome  imagemcapa reproducoes idvideoclip)
+# (id nome  imagemcapa reproducoes idvideoclip idAlbum)
 
 
 # Table: Autor
@@ -42,9 +42,9 @@ key_autor = {}
 key_genero = {}
 # (id nome)
 
-# Table: MusicaAlbum
+#Table: MusicaAlbum
 musicaAlbum = {}
-# (idMusica, idAlbum)
+#(idMusica, idAlbum)
 
 # Table: autorAlbum
 autorAlbum = []
@@ -105,14 +105,14 @@ concerto_musica = []
 
 #Table: Banda
 banda_list = {};
-#(id dataFormacao)
+#(id nome dataFormacao)
 
 #Table: Artista
 artista_list = {};
-#(id dataNascimento)
+#(id nome dataNascimento)
 
 #Table: AutorBandaArtista
-AutorBandaArtista = [];
+#AutorBandaArtista = [];
 #(idAutor idBanda idArtista)
 
 #Table: BandaArtista
@@ -219,26 +219,25 @@ def album_load(id, isBanda=0, lista_membros=[]):
     data = random.randint(1950, 2000)
     #Banda creator
     if isBanda and artist_id not in banda_list:
-        banda_list[artist_id] = data
-        AutorBandaArtista.append((artist_id,artist_id,"NULL"))
+        banda_list[artist_id] = (artist_name ,data)
+        #AutorBandaArtista.append((artist_id,artist_id,"NULL"))
         for membro in lista_membros:
             if(type(membro)==tuple):
                 if membro[1] not in key_autor:
                     key_autor[membro[1]]=membro[0]
-                    AutorBandaArtista.append((membro[1], "NULL", membro[1]))
-                    artista_list[membro[1]] = random.randint(1950, 2000)
+                    #AutorBandaArtista.append((membro[1], "NULL", membro[1]))
+                    artista_list[membro[1]] = (membro[0],random.randint(1950, 2000))
                     banda_artista.append((artist_id,membro[1]))
-
             else:
                 global id_artist_counter
                 key_autor[id_artist_counter] = membro
-                artista_list[id_artist_counter] = random.randint(1950, 2000)
-                AutorBandaArtista.append((id_artist_counter, "NULL", id_artist_counter))
+                artista_list[id_artist_counter] = (membro,random.randint(1950, 2000))
+                #AutorBandaArtista.append((id_artist_counter, "NULL", id_artist_counter))
                 banda_artista.append((artist_id, id_artist_counter))
                 id_artist_counter += 1
     elif not isBanda and artist_id not in artista_list:
-        AutorBandaArtista.append((artist_id, "NULL", artist_id))
-        artista_list[artist_id] = data
+        #AutorBandaArtista.append((artist_id, "NULL", artist_id))
+        artista_list[artist_id] = (artist_name,data)
 
 
     tracks = dj["tracks"]["data"]
@@ -248,7 +247,7 @@ def album_load(id, isBanda=0, lista_membros=[]):
         youtube_return = YoutubeAPI.youtube_search(track[1],track[0])
         if(youtube_return != "-"):
             youtube_return = youtube_return.split("///")
-            url = "https://www.youtube.com/" + youtube_return[2]
+            url = "https://www.youtube.com/watch?v=" + youtube_return[2]
             views = youtube_return[3]
             duration = youtube_return[4]
         else:
@@ -257,7 +256,7 @@ def album_load(id, isBanda=0, lista_membros=[]):
             duration = 0
 
         id_videoclip = len(videoclip_table)
-        music_list.append((track[0], track[1], cover, views, id_videoclip))
+        music_list.append((track[0], track[1], cover, views, id_videoclip, id))
         musicaAlbum[track[0]] = id
         videoclip_table.append((id_videoclip,url,random.sample(countries,1)[0],duration))
 
@@ -366,10 +365,21 @@ def export_sql():
         f.write("INSERT INTO Videoclip(id,url,localFilmagem,duracao) " +
                 "Values({0},'{1}','{2}',{3});\n".format(u[0], u[1], u[2], u[3]))
 
+    f.write("-- Table: Editora\n")
+    for u in editora_key.items():
+        f.write("INSERT INTO Editora(id,nome) " +
+                "Values({0},'{1}');\n".format(u[1], quote(u[0])))
+
+    f.write("-- Table: Album\n")
+    for u in albums_list:
+        f.write("INSERT INTO Album(id,nome,dataLancamento,idEditora) " +
+                "Values({0},'{1}','{2}',{3});\n".format(u[0], quote(u[1]), u[2], u[3]))
+
+
     f.write("-- Table: Musica\n")
     for u in music_list:
-        f.write("INSERT INTO Musica(id,nome,imagemCapa,reproducoes,idVideoclip) " +
-                "Values({0},'{1}','{2}',{3},{4});\n".format(u[0],quote(u[1]), u[2], u[3], u[4]))
+        f.write("INSERT INTO Musica(id,nome,imagemCapa,reproducoes,idVideoclip, idAlbum) " +
+                "Values({0},'{1}','{2}',{3},{4},{5});\n".format(u[0],quote(u[1]), u[2], u[3], u[4],u[5]))
 
 
     f.write("-- Table: Utilizador\n")
@@ -389,15 +399,6 @@ def export_sql():
         f.write("INSERT INTO Playlist(id,nome,idUtilizador) " +
                 "Values({0},'{1}',{2});\n".format(u[0], quote(u[1]),u[2]))
 
-    f.write("-- Table: Editora\n")
-    for u in editora_key.items():
-        f.write("INSERT INTO Editora(id,nome) " +
-                "Values({0},'{1}');\n".format(u[1], quote(u[0])))
-
-    f.write("-- Table: Album\n")
-    for u in albums_list:
-        f.write("INSERT INTO Album(id,nome,dataLancamento,idEditora) " +
-                "Values({0},'{1}','{2}',{3});\n".format(u[0], quote(u[1]), u[2], u[3]))
 
 
     f.write("-- Table: Autor\n")
@@ -407,19 +408,18 @@ def export_sql():
 
     f.write("-- Table: Banda\n")
     for u in banda_list.items():
-        f.write("INSERT INTO Banda(id,dataFormacao) " +
-                "Values({0},'{1}');\n".format(u[0], u[1]))
+        f.write("INSERT INTO Banda(id,nome,dataFormacao) " +
+                "Values({0},'{1}','{2}');\n".format(u[0], quote(u[1][0]),u[1][1]))
 
     f.write("-- Table: Artista\n")
     for u in artista_list.items():
-        f.write("INSERT INTO Artista(id,dataNascimento) " +
-                "Values({0},'{1}');\n".format(u[0], u[1]))
+        f.write("INSERT INTO Artista(id,nome,dataNascimento) " +
+                "Values({0},'{1}','{2}');\n".format(u[0], quote(u[1][0]),u[1][1]))
 
     f.write("-- Table: Concerto\n")
     for u in concerto_list:
         f.write("INSERT INTO Concerto(id,data,local) " +
                 "Values({0},'{1}','{2}');\n".format(u[0], u[1],u[2]))
-
 
 
     f.write("-- Table: Ator\n")
@@ -432,10 +432,10 @@ def export_sql():
         f.write("INSERT INTO Produtor(id,nome) " +
                 "Values({0},'{1}');\n".format(u[0], u[1]))
 
-    f.write("-- Table: MusicaAlbum\n")
-    for u in musicaAlbum.items():
-        f.write("INSERT INTO MusicaAlbum(idMusica,idAlbum) " +
-                "Values({0},{1});\n".format(u[0], u[1]))
+    # f.write("-- Table: MusicaAlbum\n")
+    # for u in musicaAlbum.items():
+    #     f.write("INSERT INTO MusicaAlbum(idMusica,idAlbum) " +
+    #             "Values({0},{1});\n".format(u[0], u[1]))
 
     f.write("-- Table: VideoclipAtor\n")
     for u in videoclip_ator:
@@ -477,10 +477,10 @@ def export_sql():
         f.write("INSERT INTO BandaArtista(idBanda,idArtista) " +
                 "Values({0},{1});\n".format(u[0], u[1]))
 
-    f.write("-- Table: AutorBandaArtista\n")
-    for u in AutorBandaArtista:
-        f.write("INSERT INTO AutorBandaArtista(idAutor,idBanda,idArtista) " +
-                "Values({0},{1},{2});\n".format(u[0], u[1], u[2]))
+    # f.write("-- Table: AutorBandaArtista\n")
+    # for u in AutorBandaArtista:
+    #     f.write("INSERT INTO AutorBandaArtista(idAutor,idBanda,idArtista) " +
+    #             "Values({0},{1},{2});\n".format(u[0], u[1], u[2]))
 
 
 if __name__ == '__main__':
