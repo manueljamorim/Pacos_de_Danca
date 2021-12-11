@@ -9,8 +9,8 @@ DROP TABLE IF EXISTS Utilizador;
 CREATE TABLE Utilizador (
   id            INTEGER PRIMARY KEY,
   nome          STRING NOT NULL,
-  username		STRING UNIQUE,
-  dataNascimento	DATE,
+  username		STRING UNIQUE NOT NULL,
+  dataNascimento	DATE NOT NULL,
   nacionalidade STRING,
   idUltimaOuvida  INTEGER REFERENCES Musica (id)
 );
@@ -23,7 +23,7 @@ CREATE TABLE Musica (
   imagemCapa	  BLOB,
   reproducoes	  INTEGER NOT NULL CHECK(reproducoes>=0),
   idVideoclip	  INTEGER	REFERENCES Videoclip (id),
-  idAlbum       INTEGER REFERENCES Album (id)
+  idAlbum       INTEGER NOT NULL REFERENCES Album (id)
 );
 
 -- Table: Genero
@@ -38,7 +38,7 @@ DROP TABLE IF EXISTS Playlist;
 CREATE TABLE Playlist (
   id            INTEGER PRIMARY KEY,
   nome          STRING NOT NULL,
-  idUtilizador 	INTEGER  REFERENCES Utilizador (id)
+  idUtilizador 	INTEGER  NOT NULL REFERENCES Utilizador (id)
 );
 
 -- Table: Album
@@ -68,7 +68,7 @@ CREATE TABLE Autor (
 DROP TABLE IF EXISTS Banda;
 CREATE TABLE Banda (
   id            INTEGER PRIMARY KEY REFERENCES Autor(id),
-  nome          STRING,
+  nome          STRING NOT NULL,
   dataFormacao  DATE
 );
 
@@ -76,7 +76,7 @@ CREATE TABLE Banda (
 DROP TABLE IF EXISTS Artista;
 CREATE TABLE Artista (
   id            INTEGER PRIMARY KEY REFERENCES Autor(id),
-  nome          STRING,
+  nome          STRING NOT NULL,
   dataNascimento	DATE
 );
 
@@ -165,7 +165,7 @@ DROP TABLE IF EXISTS GenerosFavoritos;
 CREATE TABLE GenerosFavoritos (
   idUtilizador		INTEGER REFERENCES Utilizador (id),
   idGenero			INTEGER REFERENCES Genero (id),
-  numeroOrdem		INTEGER CHECK(numeroOrdem<=3 AND numeroOrdem>0),
+  numeroOrdem		INTEGER NOT NULL CHECK(numeroOrdem<=3 AND numeroOrdem>0),
   PRIMARY KEY(idUtilizador,numeroOrdem)
 );
 
